@@ -1,14 +1,19 @@
 package dao;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.DatatypeConverter;
 
 import model.User;
 
@@ -37,7 +42,7 @@ public class UserDao {
              // SELECTを実行し、結果表を取得
             PreparedStatement pStmt = conn.prepareStatement(sql);
             pStmt.setString(1, loginId);
-            pStmt.setString(2, password);
+            pStmt.setString(2, convartpassword(password));
             ResultSet rs = pStmt.executeQuery();
 
              // 主キーに紐づくレコードは1件のみなので、rs.next()は1回だけ行う
@@ -129,7 +134,7 @@ public class UserDao {
             pStmt.setString(1, loginId);
             pStmt.setString(2, userName);
             pStmt.setString(3, birthday);
-            pStmt.setString(4, password);
+            pStmt.setString(4, convartpassword(password));
             pStmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -196,11 +201,6 @@ public class UserDao {
             // データベースへ接続
             conn = DBManager.getConnection();
 
-          //現在時間の取得
-    		java.util.Date date = new java.util.Date();
-            SimpleDateFormat dateForm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String now = dateForm.format(date);
-
             if(password.equals("")) {
 	            //INSERT文を準備
 	            String sql = "UPDATE user SET name = ? , birth_date = ? , update_date = now() WHERE id = ?";
@@ -215,7 +215,7 @@ public class UserDao {
 	            String sql = "UPDATE user SET password = ? , name = ? , birth_date = ?  WHERE id = ?";
 	            // INSERTを実行
 	            PreparedStatement pStmt = conn.prepareStatement(sql);
-	            pStmt.setString(1, password);
+	            pStmt.setString(1, convartpassword(password));
 	            pStmt.setString(2, userName);
 	            pStmt.setString(3, birthday);
 	            pStmt.setInt(4,id);
@@ -281,8 +281,7 @@ public class UserDao {
             conn = DBManager.getConnection();
 
             // SELECT文を準備
-            // TODO: 未実装：管理者以外を取得するようSQLを変更する
-            String sql = "SELECT * FROM user";
+            String sql = "SELECT * FROM user where login_id not in ('admin')";
 
              // SELECTを実行し、結果表を取得
             Statement stmt = conn.createStatement();
@@ -317,5 +316,88 @@ public class UserDao {
             }
         }
         return userList;
+    }
+
+    public List<User> findSearch(String login_Id, String userName, String startBirthday ,String endBirthday) {
+        Connection conn = null;
+        List<User> userList = new ArrayList<User>();
+
+        try {
+            // データベースへ接続
+            conn = DBManager.getConnection();
+
+            // SELECT文を準備
+            String sql = "SELECT * FROM user where login_id not in ('admin')";
+
+            if(!login_Id.equals("")) {
+            	sql += " and login_id = '" + login_Id + "'";
+            }
+
+            if(!userName.equals("")) {
+            	sql += " and name like '%" + userName + "%'";
+            }
+
+            if(!startBirthday.equals("")) {
+            	sql += " and birth_date >= '" + startBirthday + "'";
+            }
+
+            if(!endBirthday.equals("")) {
+            	sql += " and birth_date <= '" + endBirthday + "'";
+            }
+
+             // SELECTを実行し、結果表を取得
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            // 結果表に格納されたレコードの内容を
+            // Userインスタンスに設定し、ArrayListインスタンスに追加
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String loginId = rs.getString("login_id");
+                String name = rs.getString("name");
+                Date birthDate = rs.getDate("birth_date");
+                String password = rs.getString("password");
+                String createDate = rs.getString("create_date");
+                String updateDate = rs.getString("update_date");
+                User user = new User(id, loginId, name, birthDate, password, createDate, updateDate);
+
+                userList.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            // データベース切断
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        }
+        return userList;
+    }
+
+
+    private String convartpassword(String password){
+    	//ハッシュ生成前にバイト配列に置き換える際のCharset
+    	Charset charset = StandardCharsets.UTF_8;
+    	//ハッシュアルゴリズム
+    	String algorithm = "MD5";
+
+    	//ハッシュ生成処理
+    	byte[] bytes = null;
+		try {
+			bytes = MessageDigest.getInstance(algorithm).digest(password.getBytes(charset));
+		} catch (NoSuchAlgorithmException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+    	String result = DatatypeConverter.printHexBinary(bytes);
+    	//標準出力
+    	return result;
+
     }
 }

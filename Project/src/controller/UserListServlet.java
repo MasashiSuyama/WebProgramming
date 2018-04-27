@@ -57,7 +57,33 @@ public class UserListServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO 未実装：検索処理全般
+		request.setCharacterEncoding("UTF-8");
+
+		// ログインセッションがない場合、ログイン画面にリダイレクトさせる
+		HttpSession session = request.getSession();
+		User u =(User)session.getAttribute("userInfo");
+		if(u == null) {
+			response.sendRedirect("LoginServlet");
+			return;
+		}
+
+		// リクエストパラメータの入力項目を取得
+		String loginId = request.getParameter("loginId");
+		String userName = request.getParameter("userName");
+		String startBirthday = request.getParameter("startBirthday");
+		String endBirthday = request.getParameter("endBirthday");
+
+		// ユーザ一覧情報を取得
+		UserDao userDao = new UserDao();
+		List<User> userList = userDao.findSearch(loginId, userName, startBirthday ,endBirthday);
+
+		// リクエストスコープにユーザ一覧情報をセット
+		request.setAttribute("userList", userList);
+
+		// ユーザ一覧のjspにフォワード
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/jsp/userList.jsp");
+		dispatcher.forward(request, response);
+
 	}
 
 }

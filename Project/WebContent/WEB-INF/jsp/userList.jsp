@@ -22,18 +22,18 @@
 	<div>
 		<form method="post" action="#">
 			<div class="form-group row">
-				<label for="ID" class="size col-sm-2 text-center">ログインID</label>
-		    	<input type="text" id="ID" class="form-control col-sm-5">
+				<label for="loginId" class="size col-sm-2 text-center">ログインID</label>
+		    	<input type="text" id="loginId" name= loginId class="form-control col-sm-5">
 			</div>
 			<div class="form-group row">
-	    		<label for="username" class="size col-sm-2 text-center">ユーザ名</label>
-				<input type="text" id="username" class="form-control col-sm-5">
+	    		<label for="userName" class="size col-sm-2 text-center">ユーザ名</label>
+				<input type="text" id="userName" name="userName" class="form-control col-sm-5">
 			</div>
 			<div class="form-group row">
-			 	<label for="birth" class="size col-sm-2 text-center">生年月日</label>
-				<input type="text" id="birth" placeholder="年／月／日" class="form-control col-sm-2">
+			 	<label for="birthday" class="size col-sm-2 text-center">生年月日</label>
+				<input type="text" id="birthday" name="startBirthday" placeholder="年／月／日" class="form-control col-sm-2">
 				<p class="col-sm-1 text-center">～</p>
-				<input type="text" id="birth2" placeholder="年／月／日" class="form-control col-sm-2">
+				<input type="text" id="birthday" name="endBirthday" placeholder="年／月／日" class="form-control col-sm-2">
 			</div>
 			<div class="rightposition text-right">
 					<input type="submit" value="　　検索　　">
@@ -53,29 +53,27 @@
 		</thead>
 		<tbody>
 			<c:forEach var="user" items="${userList}">
-				<c:if test="${!(user.id == 1)}">
-					<tr>
-						<th scope="row">${user.loginId}</th>
-						<td>${user.name}</td>
-						<td>${user.birthDate}</td>
-						<!-- TODO 未実装；ログインボタンの表示制御を行う -->
-						<td>
-							<a href="UserDetailServlet?id=${user.id}">
-								<button type="button" class="btn btn-primary">詳細</button>
+				<tr>
+					<th scope="row">${user.loginId}</th>
+					<td>${user.name}</td>
+					<td>${user.birthDate}</td>
+					<!-- TODO 未実装；ログインボタンの表示制御を行う -->
+					<td>
+						<a href="UserDetailServlet?id=${user.id}">
+							<button type="button" class="btn btn-primary">詳細</button>
+						</a>
+						<c:if test="${userInfo.loginId.equals(user.loginId) || userInfo.loginId.equals(\"admin\")}">
+							<a href="UserUpdateServlet?id=${user.id}">
+								<button type="button" class="btn btn-success">更新</button>
 							</a>
-							<c:if test="${userInfo.loginId.equals(user.loginId) || userInfo.loginId.equals(\"admin\")}">
-								<a href="UserUpdateServlet?id=${user.id}">
-									<button type="button" class="btn btn-success">更新</button>
-								</a>
-							</c:if>
-							<c:if test="${userInfo.loginId.equals(\"admin\")}">
-								<a  href="UserDeleteServlet?id=${user.id}">
-									<button type="button" class="btn btn-danger">削除</button>
-								</a>
-							</c:if>
-						</td>
-					</tr>
-				</c:if>
+						</c:if>
+						<c:if test="${userInfo.loginId.equals(\"admin\")}">
+							<a  href="UserDeleteServlet?id=${user.id}">
+								<button type="button" class="btn btn-danger">削除</button>
+							</a>
+						</c:if>
+					</td>
+				</tr>
 			</c:forEach>
 		</tbody>
 	</table>
