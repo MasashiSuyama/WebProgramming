@@ -1,0 +1,57 @@
+h1 {
+	text-align: center;
+	margin-top: 20px;
+	margin-bottom: 40px;
+}
+
+.login-area {
+	width: 500px;
+	margin: 0 auto;
+}
+
+.login-position{
+	text-align: center;
+	margin-top: 40px;
+}
+
+.menu{
+	display: flex;
+}
+
+.rightposition{
+	text-align: right;
+	margin-right: 25px;
+}
+
+.table{
+	margin: 20px auto;
+}
+
+.menu2{
+	margin: 5px 0;
+}
+
+.botton-position{
+	text-align: center;
+	margin: 50px 0;
+}
+
+.label-position{
+	margin-top: 4px;
+}
+
+.size{
+	font-weight: 600;
+}
+
+.red-char {
+	color: red;
+	text-decoration: underline;
+}
+.red-char:hover {
+	color: red;
+}
+
+.table-area{
+	margin: 0 50px;
+}
